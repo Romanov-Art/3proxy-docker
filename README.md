@@ -30,6 +30,30 @@ TCP ports:
 | `3128`      | [HTTP proxy](https://3proxy.org/doc/man8/proxy.8.html)  |
 | `1080`      | [SOCKS proxy](https://3proxy.org/doc/man8/socks.8.html) |
 
+## Quick Start (docker-compose / Dokploy)
+
+This repo ships a root [`docker-compose.yml`](docker-compose.yml) and an [`.env.example`](.env.example) for one-command deploys.
+
+```bash
+git clone https://github.com/Romanov-Art/3proxy-docker.git
+cd 3proxy-docker
+cp .env.example .env      # then edit .env — CHANGE PROXY_LOGIN / PROXY_PASSWORD
+docker compose up -d
+```
+
+**Deploy on [Dokploy](https://dokploy.com/):**
+
+1. Create a new **Compose** service and point it at this repository (branch `master`).
+2. Set **Compose Path** to `docker-compose.yml`.
+3. Paste the contents of `.env.example` into the service **Environment** tab and change the credentials.
+4. Click **Deploy**. Ports `PROXY_PORT` (HTTP) and `SOCKS_PORT` (SOCKS5) are published on the host.
+
+By default the prebuilt image `ghcr.io/tarampampam/3proxy:2` is used. To enable
+`DNS_CACHE_SIZE`, `PROXY_EXTRA_ARGS` and `SOCKS_EXTRA_ARGS`, uncomment the
+`build:` block in `docker-compose.yml` so the image is built from this repo.
+
+See [all supported variables](#supported-environment-variables) below.
+
 ## Supported tags
 
 | Registry                               | Image                        |
@@ -43,40 +67,7 @@ TCP ports:
 
 All supported image tags can be [found here][link_docker_tags].
 
-> Starting with version 1.8.2, the `arm64` architecture is supported (in addition to `amd64`):
-
-<details>
-  <summary><strong><code>docker run --rm mplatform/mquery ghcr.io/tarampampam/3proxy:1.8.2</code></strong></summary>
-
-```shell
-Image: ghcr.io/tarampampam/3proxy:1.8.2
- * Manifest List: Yes (Image type: application/vnd.docker.distribution.manifest.list.v2+json)
- * Supported platforms:
-   - linux/amd64
-   - linux/arm64
-```
-
-</details>
-
-> Starting with version 1.12.1, the following architectures are supported: `arm/v6`, `arm/v7`, `ppc64le`, `s390x`
-> (in addition to `amd64`, `arm64`):
-
-<details>
-  <summary><strong><code>docker run --rm mplatform/mquery ghcr.io/tarampampam/3proxy:1.12.1</code></strong></summary>
-
-```shell
-Image: ghcr.io/tarampampam/3proxy:1.12.1
- * Manifest List: Yes (Image type: application/vnd.oci.image.index.v1+json)
- * Supported platforms:
-   - linux/amd64
-   - linux/arm/v6
-   - linux/arm/v7
-   - linux/arm64
-   - linux/ppc64le
-   - linux/s390x
-```
-
-</details>
+> Multi-arch images are published: `amd64`, `arm64`, `arm/v6`, `arm/v7`, `ppc64le`, `s390x`.
 
 ## Supported Environment Variables
 
@@ -96,86 +87,25 @@ Image: ghcr.io/tarampampam/3proxy:1.12.1
 | `PROXY_EXTRA_ARGS`   | Extra args appended to the `proxy` line. **Requires building from this repo** — not applied by the prebuilt image.     | `-n`                              |
 | `SOCKS_EXTRA_ARGS`   | Extra args appended to the `socks` line. **Requires building from this repo** — not applied by the prebuilt image.     | `-n`                              |
 
-## Quick Start (docker-compose / Dokploy)
-
-This repo ships a root [`docker-compose.yml`](docker-compose.yml) and an [`.env.example`](.env.example) for one-command deploys.
-
-```bash
-git clone https://github.com/tarampampam/3proxy-docker.git
-cd 3proxy-docker
-cp .env.example .env      # then edit .env — CHANGE THE PASSWORD
-docker compose up -d
-```
-
-**Deploy on [Dokploy](https://dokploy.com/):**
-
-1. Create a new **Compose** service and point it at this repository (branch `master`).
-2. Set **Compose Path** to `docker-compose.yml`.
-3. Paste the contents of `.env.example` into the service **Environment** tab and change the credentials.
-4. Click **Deploy**. Ports `PROXY_PORT` (HTTP) and `SOCKS_PORT` (SOCKS5) are published on the host.
-
-By default the prebuilt image `ghcr.io/tarampampam/3proxy:2` is used. To enable
-`DNS_CACHE_SIZE`, `PROXY_EXTRA_ARGS` and `SOCKS_EXTRA_ARGS`, uncomment the
-`build:` block in `docker-compose.yml` so the image is built from this repo.
-
 ## Helm Chart
 
 To install it on Kubernetes (K8s), please use the Helm chart from [ArtifactHUB][artifact-hub].
 
 [artifact-hub]:https://artifacthub.io/packages/helm/proxy-3proxy/proxy-3proxy
 
-## How to Use This Image
+## Plain `docker run`
 
-Example usage:
-
-```bash
-docker run --rm -d \
-  -p "3128:3128/tcp" \
-  -p "1080:1080/tcp" \
-  ghcr.io/tarampampam/3proxy:1
-```
-
-With authentication and custom resolver settings:
+Prefer [docker-compose](#quick-start-docker-compose--dokploy) above. For a quick one-off:
 
 ```bash
 docker run --rm -d \
   -p "3128:3128/tcp" \
   -p "1080:1080/tcp" \
-  -e "PROXY_LOGIN=evil" \
-  -e "PROXY_PASSWORD=live" \
-  -e "PRIMARY_RESOLVER=2001:4860:4860::8888" \
-  ghcr.io/tarampampam/3proxy:1
+  -e "PROXY_LOGIN=User" \
+  -e "PROXY_PASSWORD=Password" \
+  -e "PRIMARY_RESOLVER=1.1.1.1" \
+  ghcr.io/tarampampam/3proxy:2
 ```
-
-Docker compose example:
-
-```yaml
-services:
-  3proxy:
-    image: ghcr.io/tarampampam/3proxy:1
-    environment:
-      PROXY_LOGIN: evil
-      PROXY_PASSWORD: live
-      MAX_CONNECTIONS: 10000
-      PROXY_PORT: 8000
-      SOCKS_PORT: 8001
-      PRIMARY_RESOLVER: 77.88.8.8
-      SECONDARY_RESOLVER: 8.8.8.8
-    ports:
-      - '8000:8000/tcp'
-      - '8001:8001/tcp'
-```
-
-## Releasing
-
-Publishing a new version is straightforward:
-
-1. Make the necessary changes in this repository.
-2. "Publish" a new release on the repository's releases page.
-
-Docker images will be automatically built and published.
-
-> Note: The `latest` tag will be overwritten in both registries when a new release is published.
 
 ## Support
 
