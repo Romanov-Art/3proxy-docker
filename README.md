@@ -92,6 +92,31 @@ Image: ghcr.io/tarampampam/3proxy:1.12.1
 | `SOCKS_PORT`         | SOCKS proxy port (`1080` by default)                                                                                  | `8888`                            |
 | `EXTRA_CONFIG`       | Additional 3proxy configuration (appended to the **end** of the config file, but before `proxy` and `flush`)          | `# line 1\n# line 2`              |
 | `LOG_OUTPUT`         | Path for log output (`/dev/stdout` by default; set to `/dev/null` to disable logging)                                 | `/tmp/3proxy.log`                 |
+| `DNS_CACHE_SIZE`     | DNS cache size (`65536` by default). **Requires building from this repo** — not applied by the prebuilt image.        | `131072`                          |
+| `PROXY_EXTRA_ARGS`   | Extra args appended to the `proxy` line. **Requires building from this repo** — not applied by the prebuilt image.     | `-n`                              |
+| `SOCKS_EXTRA_ARGS`   | Extra args appended to the `socks` line. **Requires building from this repo** — not applied by the prebuilt image.     | `-n`                              |
+
+## Quick Start (docker-compose / Dokploy)
+
+This repo ships a root [`docker-compose.yml`](docker-compose.yml) and an [`.env.example`](.env.example) for one-command deploys.
+
+```bash
+git clone https://github.com/tarampampam/3proxy-docker.git
+cd 3proxy-docker
+cp .env.example .env      # then edit .env — CHANGE THE PASSWORD
+docker compose up -d
+```
+
+**Deploy on [Dokploy](https://dokploy.com/):**
+
+1. Create a new **Compose** service and point it at this repository (branch `master`).
+2. Set **Compose Path** to `docker-compose.yml`.
+3. Paste the contents of `.env.example` into the service **Environment** tab and change the credentials.
+4. Click **Deploy**. Ports `PROXY_PORT` (HTTP) and `SOCKS_PORT` (SOCKS5) are published on the host.
+
+By default the prebuilt image `ghcr.io/tarampampam/3proxy:2` is used. To enable
+`DNS_CACHE_SIZE`, `PROXY_EXTRA_ARGS` and `SOCKS_EXTRA_ARGS`, uncomment the
+`build:` block in `docker-compose.yml` so the image is built from this repo.
 
 ## Helm Chart
 

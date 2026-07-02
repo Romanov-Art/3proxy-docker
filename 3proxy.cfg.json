@@ -9,7 +9,7 @@
     "9.9.9.9",
     "8.8.8.8"
   ],
-  "name_servers_cache": 65536,
+  "name_servers_cache": "${DNS_CACHE_SIZE:-65536}",
   "max_connections": "${MAX_CONNECTIONS:-1024}",
   "auth": {
     "login": "${PROXY_LOGIN:-}",
@@ -20,5 +20,7 @@
     "proxy": "${PROXY_PORT:-3128}",
     "socks": "${SOCKS_PORT:-1080}"
   },
-  "extra_config": "${EXTRA_CONFIG}"
+  "extra_config": "${EXTRA_CONFIG}",
+  "proxy_extra_args": "${PROXY_EXTRA_ARGS}",
+  "socks_extra_args": "${SOCKS_EXTRA_ARGS}"
 }

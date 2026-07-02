@@ -1,0 +1,43 @@
+# =========================
+#   3Proxy — HTTP/HTTPS + SOCKS5 proxy
+# =========================
+# Dokploy: create a "Compose" service pointing at this repo, upload/paste
+# your .env (copy .env.example -> .env), then Deploy.
+# Local:   cp .env.example .env && docker compose up -d
+
+services:
+  3proxy:
+    image: ${IMAGE:-ghcr.io/tarampampam/3proxy:2}
+    container_name: ${CONTAINER_NAME:-3proxy}
+    restart: unless-stopped
+
+    # The prebuilt image ships fixed DNS cache and no extra proxy/socks args.
+    # To make DNS_CACHE_SIZE / PROXY_EXTRA_ARGS / SOCKS_EXTRA_ARGS take effect,
+    # build the image from this repo — uncomment the block below:
+    # build:
+    #   context: .
+
+    environment:
+      PROXY_LOGIN: "${PROXY_LOGIN:-}"
+      PROXY_PASSWORD: "${PROXY_PASSWORD:-}"
+      EXTRA_ACCOUNTS: "${EXTRA_ACCOUNTS:-{}}"
+      PROXY_PORT: "${PROXY_PORT:-3128}"
+      SOCKS_PORT: "${SOCKS_PORT:-1080}"
+      PRIMARY_RESOLVER: "${PRIMARY_RESOLVER:-1.1.1.1}"
+      SECONDARY_RESOLVER: "${SECONDARY_RESOLVER:-8.8.8.8}"
+      MAX_CONNECTIONS: "${MAX_CONNECTIONS:-1024}"
+      DNS_CACHE_SIZE: "${DNS_CACHE_SIZE:-65536}"
+      LOG_OUTPUT: "${LOG_OUTPUT:-/dev/stdout}"
+      EXTRA_CONFIG: "${EXTRA_CONFIG:-}"
+      PROXY_EXTRA_ARGS: "${PROXY_EXTRA_ARGS:-}"
+      SOCKS_EXTRA_ARGS: "${SOCKS_EXTRA_ARGS:-}"
+
+    ports:
+      - "${PROXY_PORT:-3128}:${PROXY_PORT:-3128}/tcp"  # HTTP/HTTPS proxy
+      - "${SOCKS_PORT:-1080}:${SOCKS_PORT:-1080}/tcp"  # SOCKS5 proxy
+
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
